@@ -13,4 +13,21 @@ export default class City {
     this.district = district;
     this.population = population;
   }
+
+  get populationFormatted() {
+    return this.population.toLocaleString();
+  }
+
+  get countryName() {
+    return this.country ? this.country.name : null;
+  }
+
+  setCountry(country) {
+    this.country = country;
+  }
+
+  static fromRow(row) {
+    const [id, name, countryCode, district, population] = row;
+    return new City(id, name, countryCode, district, population);
+  }
 }

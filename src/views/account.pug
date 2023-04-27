@@ -1,5 +1,7 @@
-extends layout.pug 
+extends layout.pug
 
 block content
   h2 Account
   div #{user.email}
+  form(action="/logout", method="POST")
+    button(type="submit") Logout
