@@ -1,0 +1,16 @@
+extends layout
+
+block head
+  title Country Search
+
+block content
+  div.center-top
+    h1 Country Search
+    form(method="get")
+      div.form-group
+        label(for="Country") Country Name:
+        input(type="text", name="Country")
+      button(type="submit") Search
+
+block head
+  link(rel="stylesheet", href="/country.css")

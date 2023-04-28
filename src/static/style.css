@@ -1,10 +1,12 @@
 html,
 body {
-  font-size: 14px;
+  font-size: 15px;
   font-family: "Segoe UI", sans-serif;
-  background-color: #eeeeee;
+  background-image: url(3.jpg);
+  background-color: #ffffff;
   margin: 0;
   padding: 0;
+  font-family: #000000;
 }
 
 *,

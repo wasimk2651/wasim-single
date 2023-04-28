@@ -4,6 +4,7 @@ import mysql from "mysql2/promise";
 import bcrypt from "bcryptjs";
 import DatabaseService from "./services/database.service.mjs";
 import session from "express-session";
+import Country from "./models/country.mjs";
 
 /* Create express instance */
 const app = express();
@@ -35,20 +36,14 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
-// Sample API route
-app.get("/ping", (req, res) => {
-  res.send("pong");
-});
+
 
 // Landing route
 app.get("/", (req, res) => {
   res.render("index");
 });
 
-// Gallery route
-app.get("/gallery", (req, res) => {
-  res.render("gallery");
-});
+
 
 // About route
 app.get("/about", (req, res) => {
@@ -68,6 +63,24 @@ app.get("/cities/:id", async (req, res) => {
 });
 
 /* Update a city by ID */
+// Search for cities
+app.get("/cities", async (req, res) => {
+  const query = req.query.q;
+  let [rows, fields] = [[], []];
+
+  if (query) {
+    // Search cities by name
+    [rows, fields] = await db.searchCities(query);
+  } else {
+    // Get all cities
+    [rows, fields] = await db.getCities();
+  }
+
+  // Render cities.pug with data passed as plain object
+  return res.render("cities", { rows, fields, query });
+});
+
+// Update a city by ID
 app.post("/cities/:id", async (req, res) => {
   const cityId = req.params.id;
   const { name } = req.body;
@@ -76,9 +89,44 @@ app.post("/cities/:id", async (req, res) => {
     SET Name = '${name}'
     WHERE ID = '${cityId}';
   `;
-  await conn.execute(sql);
-  return res.redirect(`/cities/${cityId}`);
+  await pool.execute(sql);
+  return res.redirect(`/cities/${cityId}?updated=true`);
 });
+// City search route
+app.get("/search", async (req, res) => {
+  const city = req.query.city;
+  if (!city) {
+    // If no city name is provided, return an empty page
+    return res.render("search");
+  }
+  try {
+    const [rows, fields] = await conn.execute(
+      `SELECT * FROM city WHERE Name LIKE '%${city}%'`
+    );
+    // Render the search results in a table
+    return res.render("search-results", { rows, fields });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Internal server error");
+  }
+}); 
+app.get("/country-search", async (req, res) => {
+  const Country = req.query.Country;
+  if (!Country) {
+    // If no city name is provided, return an empty page
+    return res.render("country-search");
+  }
+  try {
+    const [rows, fields] = await conn.execute(
+      `SELECT * FROM country WHERE Name LIKE '%${Country}%'`
+    );
+    // Render the search results in a table
+    return res.render("country-results", { rows, fields });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Internal server error");
+  }
+}); 
 
 // Returns JSON array of cities
 app.get("/api/cities", async (req, res) => {
@@ -169,7 +217,7 @@ app.get('/logout', (req, res) => {
       console.log(err);
     } else {
       res.redirect('/login');
-    }
+    } 
   });
 });
 
